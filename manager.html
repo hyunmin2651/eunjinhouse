@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지 - 은진부동산</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        header {
+            background:#ffffff;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .login-container h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 2rem;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: none;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            color: #1e3c72;
+        }
+
+        .logout-btn {
+            padding: 0.8rem 1.5rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .stat-card .label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .consultations {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .consultations h2 {
+            color: #1e3c72;
+            margin-bottom: 1.5rem;
+        }
+
+        .consultation-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.3s;
+        }
+
+        .consultation-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .consultation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .consultation-info {
+            flex: 1;
+        }
+
+        .consultation-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .consultation-phone {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 0.3rem;
+        }
+
+        .consultation-date {
+            font-size: 0.9rem;
+            color: #999;
+        }
+
+        .consultation-content {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .filter-section {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-section input {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        .refresh-btn {
+            padding: 0.8rem 1.5rem;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .refresh-btn:hover {
+            background: #218838;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html"><img src="logo.png" alt="은진부동산 로고"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">홈</a></li>
+                <li><a href="consultation.html">상담신청</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="login-container" id="loginContainer">
+        <h1>🔐 관리자 로그인</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button type="submit" class="login-btn">로그인</button>
+            <div class="error-message" id="errorMessage">비밀번호가 올바르지 않습니다.</div>
+        </form>
+    </div>
+
+    <div class="admin-container" id="adminContainer">
+        <div class="admin-header">
+            <h1>📊 상담 신청 관리</h1>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number" id="totalCount">0</div>
+                <div class="label">총 상담 신청</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="todayCount">0</div>
+                <div class="label">오늘 신청</div>
+            </div>
+        </div>
+
+        <div class="consultations">
+            <div class="filter-section">
+                <h2 style="margin: 0;">상담 신청 목록</h2>
+                <input type="text" id="searchInput" placeholder="이름 또는 전화번호로 검색...">
+                <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+            </div>
+            <div id="consultationList"></div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = '2651andy!';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzORH34maz6797XiT09htJwTlS-skOHjRqUbEZyFlNNX1DlLc2_UYz-QXTiXmrhiSzt/exec';
+        let allData = [];
+
+        // 로그인
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('adminContainer').style.display = 'block';
+                loadData();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+
+        // 로그아웃
+        function logout() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('adminContainer').style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // 데이터 불러오기
+        async function loadData() {
+            const listDiv = document.getElementById('consultationList');
+            listDiv.innerHTML = '<div class="loading">데이터를 불러오는 중...</div>';
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+                
+                console.log('받은 데이터:', result);
+
+                if (result.status === 'success') {
+                    allData = result.data || [];
+                    allData.reverse(); // 최신순 정렬
+                    
+                    updateStats();
+                    displayData(allData);
+                } else {
+                    throw new Error('데이터 로드 실패');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                listDiv.innerHTML = '<div class="empty-message">⚠️ 데이터를 불러오는 중 오류가 발생했습니다.<br>' + error.message + '</div>';
+            }
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayData = allData.filter(item => {
+                if (!item['신청일시']) return false;
+                try {
+                    const itemDate = new Date(item['신청일시']);
+                    return itemDate.toDateString() === today;
+                } catch {
+                    return false;
+                }
+            });
+
+            document.getElementById('totalCount').textContent = allData.length;
+            document.getElementById('todayCount').textContent = todayData.length;
+        }
+
+        // 데이터 표시
+        function displayData(data) {
+            const listDiv = document.getElementById('consultationList');
+            
+            if (data.length === 0) {
+                listDiv.innerHTML = '<div class="empty-message">📭 아직 상담 신청이 없습니다.</div>';
+                return;
+            }
+
+            listDiv.innerHTML = data.map(item => `
+                <div class="consultation-item">
+                    <div class="consultation-header">
+                        <div class="consultation-info">
+                            <div class="consultation-name">👤 ${item['이름'] || '이름 없음'}</div>
+                            <div class="consultation-phone">📞 ${item['전화번호'] || '전화번호 없음'}</div>
+                            <div class="consultation-date">📅 ${item['신청일시'] || '날짜 없음'}</div>
+                        </div>
+                    </div>
+                    ${item['상담내용'] ? `<div class="consultation-content"><strong>상담 내용:</strong><br>${item['상담내용']}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 검색
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allData.filter(item => 
+                (item['이름'] && item['이름'].toLowerCase().includes(searchTerm)) || 
+                (item['전화번호'] && item['전화번호'].includes(searchTerm))
+            );
+            displayData(filtered);
+        });
+    </script>
+</body>
+</html>

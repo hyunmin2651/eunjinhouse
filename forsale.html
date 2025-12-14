@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매물정보 - 은진부동산</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/kakao-map/2.0.0/kakao.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #ffffff;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .page-header {
+            background: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .controls {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .view-btn {
+            padding: 0.8rem 1.5rem;
+            border: 2px solid #2a5298;
+            background: white;
+            color: #2a5298;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .view-btn.active {
+            background: #2a5298;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #2a5298;
+            color: white;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .filter-select {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+
+        .search-input {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            flex: 1;
+        }
+
+        .list-view {
+            display: block;
+        }
+
+        .map-view {
+            display: none;
+        }
+
+        .property-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .property-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #e0e0e0;
+        }
+
+        .carousel {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: #e0e0e0;
+        }
+
+        .carousel-images {
+            display: flex;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .carousel-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 10;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .carousel-btn.prev {
+            left: 5px;
+        }
+
+        .carousel-btn.next {
+            right: 5px;
+        }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+        }
+
+        .carousel-dot.active {
+            background: white;
+        }
+
+        .property-content {
+            padding: 1.5rem;
+        }
+
+        .property-type {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: #2a5298;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .property-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1e3c72;
+            margin: 0.5rem 0;
+        }
+
+        .property-address {
+            color: #666;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .property-details {
+            display: flex;
+            gap: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .property-details span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .property-description {
+            margin-top: 1rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 350px);
+        }
+
+        .map-list {
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .map-property-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .map-property-item:hover {
+            background: #f8f9fa;
+        }
+
+        .map-property-item:last-child {
+            border-bottom: none;
+        }
+
+        #map {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+            font-size: 1.1rem;
+            background: white;
+            border-radius: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+            background: white;
+            border-radius: 15px;
+        }
+
+        footer {
+            background: #7b7e81;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 968px) {
+            .map-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            #map {
+                height: 400px;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html"><img src="logo.png" alt="은진부동산 로고"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">홈</a></li>
+                <li><a href="forsale.html">매물정보</a></li>
+                <li><a href="solution.html">상담신청</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="page-header">
+        <h1>매물 정보</h1>
+        <p>다양한 매물을 확인하세요</p>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <div class="view-toggle">
+                <button class="view-btn active" onclick="switchView('list')">📋 리스트</button>
+                <button class="view-btn" onclick="switchView('map')">🗺️ 지도</button>
+            </div>
+            <div class="filter-group">
+                <select class="filter-select" id="typeFilter">
+                    <option value="">전체 매물</option>
+                    <option value="아파트">아파트</option>
+                    <option value="빌라">빌라</option>
+                    <option value="오피스텔">오피스텔</option>
+                    <option value="단독주택">단독주택</option>
+                    <option value="상가">상가</option>
+                    <option value="토지">토지</option>
+                </select>
+                <select class="filter-select" id="dealFilter">
+                    <option value="">전체 거래</option>
+                    <option value="매매">매매</option>
+                    <option value="전세">전세</option>
+                    <option value="월세">월세</option>
+                </select>
+                <input type="text" class="search-input" id="searchInput" placeholder="주소로 검색...">
+            </div>
+        </div>
+
+        <div class="list-view" id="listView">
+            <div class="property-list" id="propertyList">
+                <div class="loading">매물 정보를 불러오는 중...</div>
+            </div>
+        </div>
+
+        <div class="map-view" id="mapView">
+            <div class="map-container">
+                <div class="map-list" id="mapList"></div>
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 은진부동산.<br>주의 : 본 공인중개사도 아무것도 모르니까 조심하세요. </p>
+        <p style="margin-top: 0.5rem;"><a href="forsale_manager.html"
+                style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem;">🔐 매물 관리</a></p>
+    </footer>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_AOHN5QKRqQiLq-Cdrj-NAUgdA4txgNGSbKRzrhzY4pMEjKrwkatqwCgpHGNj-4WXiQ/exec';
+        let allProperties = [];
+        let filteredProperties = [];
+        let currentView = 'list';
+
+        // 페이지 로드 시 데이터 불러오기
+        // 페이지 로드 시 데이터 불러오기
+        window.onload = function () {
+            console.log('페이지 로드됨');
+            console.log('현재 URL:', window.location.href);
+            console.log('URL 파라미터:', window.location.search);
+
+            // URL 파라미터 먼저 읽기
+            const urlParams = new URLSearchParams(window.location.search);
+            const propertyType = urlParams.get('type');
+            const dealType = urlParams.get('deal');
+
+            console.log('매물종류:', propertyType);
+            console.log('거래유형:', dealType);
+
+            // 필터 선택 설정
+            if (propertyType) {
+                document.getElementById('typeFilter').value = propertyType;
+            }
+            if (dealType) {
+                document.getElementById('dealFilter').value = dealType;
+            }
+
+            // 데이터 로드 (로드 후 자동으로 필터 적용됨)
+            loadProperties();
+        };
+
+        // 매물 데이터 불러오기
+        async function loadProperties() {
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+
+                console.log('받은 데이터:', result);
+
+                if (result.status === 'success') {
+                    allProperties = result.data || [];
+                    filteredProperties = allProperties;
+
+                    // URL 파라미터가 있으면 필터 적용
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('type') || urlParams.get('deal')) {
+                        applyFilters();
+                    } else {
+                        displayProperties();
+                    }
+                }
+                else {
+                    throw new Error('데이터 로드 실패');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('propertyList').innerHTML =
+                    '<div class="empty-message">⚠️ 매물 정보를 불러오는 중 오류가 발생했습니다.</div>';
+            }
+        }
+
+        // 매물 표시
+        function displayProperties() {
+            const listDiv = document.getElementById('propertyList');
+
+            if (filteredProperties.length === 0) {
+                listDiv.innerHTML = '<div class="empty-message">📭 등록된 매물이 없습니다.</div>';
+                return;
+            }
+
+            listDiv.innerHTML = filteredProperties.map((prop, propIndex) => {
+                const imageUrls = prop['이미지URL'] ? prop['이미지URL'].split(',').filter(url => url.trim()) : [];
+                const hasImages = imageUrls.length > 0;
+
+                return `
+                <div class="property-card">
+                    ${hasImages ? `
+                        <div class="carousel" id="carousel-${propIndex}">
+                            <div class="carousel-images" id="carousel-images-${propIndex}">
+                                ${imageUrls.map(url => `<img src="${url.trim()}" alt="매물 이미지">`).join('')}
+                            </div>
+                            ${imageUrls.length > 1 ? `
+                                <button class="carousel-btn prev" onclick="moveCarousel(${propIndex}, -1)">‹</button>
+                                <button class="carousel-btn next" onclick="moveCarousel(${propIndex}, 1)">›</button>
+                                <div class="carousel-dots">
+                                    ${imageUrls.map((_, i) => `<div class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${propIndex}, ${i})"></div>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : '<div class="property-image" style="background:#e0e0e0; display:flex; align-items:center; justify-content:center; color:#999;">이미지 없음</div>'}
+                    <div class="property-content">
+                        <span class="property-type">${prop['매물종류'] || '매물'} · ${prop['거래유형'] || '거래'}</span>
+                        <div class="property-price">${prop['가격'] || '가격 문의'}</div>
+                        <div class="property-address">
+                            📍 ${prop['주소'] || '주소 정보 없음'}
+                            ${prop['주소'] ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(prop['주소'])}" target="_blank" style="margin-left: 0.5rem; color: #2a5298; text-decoration: none; font-size: 0.9rem;">🗺️ 지도보기</a>` : ''}
+                        </div>
+                        <div class="property-details">
+                            ${prop['면적'] ? `<span>📐 ${prop['면적']}</span>` : ''}
+                            ${prop['방개수'] ? `<span>🛏️ ${prop['방개수']}개</span>` : ''}
+                            ${prop['욕실개수'] ? `<span>🚿 ${prop['욕실개수']}개</span>` : ''}
+                        </div>
+                        ${prop['설명'] ? `<div class="property-description">${prop['설명']}</div>` : ''}
+                    </div>
+                </div>
+            `}).join('');
+
+            // 각 카드의 현재 슬라이드 인덱스 초기화
+            window.carouselIndexes = filteredProperties.map(() => 0);
+        }
+
+        // 캐러셀 이동
+        function moveCarousel(propIndex, direction) {
+            const prop = filteredProperties[propIndex];
+            const imageUrls = prop['이미지URL'] ? prop['이미지URL'].split(',').filter(url => url.trim()) : [];
+            const maxIndex = imageUrls.length - 1;
+
+            window.carouselIndexes[propIndex] = (window.carouselIndexes[propIndex] + direction + imageUrls.length) % imageUrls.length;
+
+            updateCarousel(propIndex);
+        }
+
+        // 특정 슬라이드로 이동
+        function goToSlide(propIndex, slideIndex) {
+            window.carouselIndexes[propIndex] = slideIndex;
+            updateCarousel(propIndex);
+        }
+
+        // 캐러셀 UI 업데이트
+        function updateCarousel(propIndex) {
+            const imagesContainer = document.getElementById(`carousel-images-${propIndex}`);
+            const currentIndex = window.carouselIndexes[propIndex];
+
+            if (imagesContainer) {
+                imagesContainer.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+                // 점(dots) 업데이트
+                const carousel = document.getElementById(`carousel-${propIndex}`);
+                const dots = carousel.querySelectorAll('.carousel-dot');
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentIndex);
+                });
+            }
+        }
+
+        // 지도에 매물 표시
+        function displayMapView() {
+            const mapList = document.getElementById('mapList');
+            const mapDiv = document.getElementById('map');
+
+            if (filteredProperties.length === 0) {
+                mapList.innerHTML = '<div class="empty-message">📭 등록된 매물이 없습니다.</div>';
+                mapDiv.innerHTML = '<div class="empty-message">지도를 표시할 수 없습니다.</div>';
+                return;
+            }
+
+            mapList.innerHTML = filteredProperties.map((prop, index) => `
+                <div class="map-property-item" onclick="showPropertyOnMap(${index})">
+                    <div style="font-weight: bold; margin-bottom: 0.5rem;">${prop['매물종류'] || '매물'} · ${prop['거래유형'] || '거래'}</div>
+                    <div style="font-size: 1.2rem; color: #1e3c72; font-weight: bold; margin-bottom: 0.5rem;">${prop['가격'] || '가격 문의'}</div>
+                    <div style="color: #666; margin-bottom: 0.5rem;">📍 ${prop['주소'] || '주소 정보 없음'}</div>
+                    <div style="color: #2a5298; font-size: 0.9rem;">🗺️ 클릭하여 지도에서 보기</div>
+                </div>
+            `).join('');
+
+            // 첫 번째 매물 위치로 지도 표시
+            showPropertyOnMap(0);
+        }
+
+        // 선택한 매물을 지도에 표시
+        function showPropertyOnMap(index) {
+            const property = filteredProperties[index];
+            const mapDiv = document.getElementById('map');
+
+            if (property && property['주소']) {
+                mapDiv.innerHTML = `
+                    <iframe 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0; border-radius: 15px;" 
+                        loading="lazy" 
+                        allowfullscreen
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(property['주소'])}">
+                    </iframe>
+                `;
+
+                // 선택된 매물 하이라이트
+                const items = document.querySelectorAll('.map-property-item');
+                items.forEach((item, i) => {
+                    if (i === index) {
+                        item.style.background = '#e7f3ff';
+                        item.style.borderLeft = '4px solid #2a5298';
+                    } else {
+                        item.style.background = '';
+                        item.style.borderLeft = '';
+                    }
+                });
+            } else {
+                mapDiv.innerHTML = `
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa; border-radius: 15px;">
+                        <div style="text-align: center; color: #666;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🗺️</div>
+                            <div style="font-size: 1.2rem;">주소 정보가 없습니다</div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 뷰 전환
+        function switchView(view) {
+            currentView = view;
+            const listView = document.getElementById('listView');
+            const mapView = document.getElementById('mapView');
+            const buttons = document.querySelectorAll('.view-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            if (view === 'list') {
+                listView.style.display = 'block';
+                mapView.style.display = 'none';
+                buttons[0].classList.add('active');
+            } else {
+                listView.style.display = 'none';
+                mapView.style.display = 'block';
+                buttons[1].classList.add('active');
+                displayMapView();
+            }
+        }
+
+        // 필터링
+        function applyFilters() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const dealFilter = document.getElementById('dealFilter').value;
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+
+            filteredProperties = allProperties.filter(prop => {
+                const matchType = !typeFilter || prop['매물종류'] === typeFilter;
+                const matchDeal = !dealFilter || prop['거래유형'] === dealFilter;
+                const matchSearch = !searchText || (prop['주소'] && prop['주소'].toLowerCase().includes(searchText));
+
+                return matchType && matchDeal && matchSearch;
+            });
+
+            if (currentView === 'list') {
+                displayProperties();
+            } else {
+                displayMapView();
+            }
+        }
+
+        // 이벤트 리스너
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        document.getElementById('dealFilter').addEventListener('change', applyFilters);
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>매물 관리 - 은진부동산</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        header {
+            background:#ffffff;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo img {
+            height: 60px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgb(0, 0, 0);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .login-container h1 {
+            text-align: center;
+            color: #1e3c72;
+            margin-bottom: 2rem;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            display: none;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            color: #1e3c72;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .logout-btn, .add-btn {
+            padding: 0.8rem 1.5rem;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .add-btn {
+            background: #28a745;
+        }
+
+        .add-btn:hover {
+            background: #218838;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .login-btn, .submit-btn, .cancel-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .login-btn, .submit-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .login-btn:hover, .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+            margin-top: 0.5rem;
+        }
+
+        .cancel-btn:hover {
+            background: #5a6268;
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 600px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-header h2 {
+            color: #1e3c72;
+        }
+
+        .close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .properties-grid {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .properties-grid h2 {
+            color: #1e3c72;
+            margin-bottom: 1.5rem;
+        }
+
+        .property-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .property-table th {
+            background: #f8f9fa;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid #e0e0e0;
+            color: #333;
+        }
+
+        .property-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .property-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .edit-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #0056b3;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2a5298;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html"><img src="logo.png" alt="은진부동산 로고"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">홈</a></li>
+                <li><a href="forsale.html">매물정보</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="login-container" id="loginContainer">
+        <h1>🔐 관리자 로그인</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button type="submit" class="login-btn">로그인</button>
+            <div class="error-message" id="errorMessage">비밀번호가 올바르지 않습니다.</div>
+        </form>
+    </div>
+
+    <div class="admin-container" id="adminContainer">
+        <div class="admin-header">
+            <h1>🏢 매물 관리</h1>
+            <div class="header-buttons">
+                <button class="add-btn" onclick="openAddModal()">➕ 매물 추가</button>
+            </div>
+        </div>
+        <div class="properties-grid">
+            <h2>등록된 매물 목록</h2>
+            <div id="propertyTableContainer">
+                <div class="loading">데이터를 불러오는 중...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 매물 추가/수정 모달 -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">매물 추가</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="propertyForm">
+                <div class="form-group">
+                    <label for="propertyType">매물종류 *</label>
+                    <select id="propertyType" required>
+                        <option value="">선택하세요</option>
+                        <option value="아파트">아파트</option>
+                        <option value="빌라">빌라</option>
+                        <option value="오피스텔">오피스텔</option>
+                        <option value="단독주택">단독주택</option>
+                        <option value="상가">상가</option>
+                        <option value="토지">토지</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dealType">거래유형 *</label>
+                    <select id="dealType" required>
+                        <option value="">선택하세요</option>
+                        <option value="매매">매매</option>
+                        <option value="전세">전세</option>
+                        <option value="월세">월세</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">주소 *</label>
+                    <input type="text" id="address" placeholder="예: 경기도 화성시 동탄동 123" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">가격 *</label>
+                    <input type="text" id="price" placeholder="예: 5억 또는 전세 3억 또는 월세 100/50" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="area">면적</label>
+                    <input type="text" id="area" placeholder="예: 84㎡">
+                </div>
+
+                <div class="form-group">
+                    <label for="rooms">방개수</label>
+                    <input type="text" id="rooms" placeholder="예: 3">
+                </div>
+
+                <div class="form-group">
+                    <label for="bathrooms">욕실개수</label>
+                    <input type="text" id="bathrooms" placeholder="예: 2">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">설명</label>
+                    <textarea id="description" placeholder="매물에 대한 상세 설명을 입력하세요"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageFile">매물 이미지 업로드 (여러 장 가능)</label>
+                    <input type="file" id="imageFile" accept="image/*" multiple style="padding: 0.5rem;">
+                    <div id="imagePreview" style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+                    <div id="uploadStatus" style="margin-top: 0.5rem; color: #666; font-size: 0.9rem;"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">저장</button>
+                <button type="button" class="cancel-btn" onclick="closeModal()">취소</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = '2651andy!';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx_AOHN5QKRqQiLq-Cdrj-NAUgdA4txgNGSbKRzrhzY4pMEjKrwkatqwCgpHGNj-4WXiQ/exec';
+        let allProperties = [];
+        let editingRowIndex = null;
+        let uploadedImageUrls = [];
+
+        // 로그인
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('adminContainer').style.display = 'block';
+                loadProperties();
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        });
+
+        // 로그아웃
+        function logout() {
+            document.getElementById('loginContainer').style.display = 'block';
+            document.getElementById('adminContainer').style.display = 'none';
+            document.getElementById('password').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // 매물 불러오기
+        async function loadProperties() {
+            const container = document.getElementById('propertyTableContainer');
+            container.innerHTML = '<div class="loading">데이터를 불러오는 중...</div>';
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const result = await response.json();
+                
+                console.log('받은 데이터:', result);
+
+                if (result.status === 'success') {
+                    allProperties = result.data || [];
+                    displayProperties();
+                } else {
+                    throw new Error('데이터 로드 실패');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="empty-message">⚠️ 데이터를 불러오는 중 오류가 발생했습니다.</div>';
+            }
+        }
+
+        // 매물 표시
+        function displayProperties() {
+            const container = document.getElementById('propertyTableContainer');
+            
+            if (allProperties.length === 0) {
+                container.innerHTML = '<div class="empty-message">📭 등록된 매물이 없습니다.<br>Google Sheets에 매물을 추가해주세요.</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="property-table">
+                    <thead>
+                        <tr>
+                            <th>매물종류</th>
+                            <th>거래유형</th>
+                            <th>주소</th>
+                            <th>가격</th>
+                            <th>면적</th>
+                            <th>방/욕실</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allProperties.map((prop, index) => `
+                            <tr>
+                                <td>${prop['매물종류'] || '-'}</td>
+                                <td>${prop['거래유형'] || '-'}</td>
+                                <td>${prop['주소'] || '-'}</td>
+                                <td><strong>${prop['가격'] || '-'}</strong></td>
+                                <td>${prop['면적'] || '-'}</td>
+                                <td>${prop['방개수'] || '-'}/${prop['욕실개수'] || '-'}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="edit-btn" onclick="editProperty(${index})">✏️ 수정</button>
+                                        <button class="delete-btn" onclick="deleteProperty(${index})">🗑️ 삭제</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // 모달 열기 (추가)
+        function openAddModal() {
+            editingRowIndex = null;
+            uploadedImageUrls = [];
+            document.getElementById('propertyModal').style.display = 'block';
+            document.getElementById('modalTitle').textContent = '매물 추가';
+            document.getElementById('propertyForm').reset();
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('uploadStatus').textContent = '';
+        }
+
+        // 수정 모달 열기
+        function editProperty(index) {
+            editingRowIndex = index;
+            uploadedImageUrls = [];
+            const prop = allProperties[index];
+            
+            document.getElementById('propertyModal').style.display = 'block';
+            document.getElementById('modalTitle').textContent = '매물 수정';
+            
+            document.getElementById('propertyType').value = prop['매물종류'] || '';
+            document.getElementById('dealType').value = prop['거래유형'] || '';
+            document.getElementById('address').value = prop['주소'] || '';
+            document.getElementById('price').value = prop['가격'] || '';
+            document.getElementById('area').value = prop['면적'] || '';
+            document.getElementById('rooms').value = prop['방개수'] || '';
+            document.getElementById('bathrooms').value = prop['욕실개수'] || '';
+            document.getElementById('description').value = prop['설명'] || '';
+            
+            // 기존 이미지가 있으면 미리보기 표시
+            if (prop['이미지URL']) {
+                const urls = prop['이미지URL'].split(',').filter(url => url.trim());
+                uploadedImageUrls = urls;
+                const previewDiv = document.getElementById('imagePreview');
+                previewDiv.innerHTML = urls.map(url => 
+                    `<img src="${url.trim()}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 10px;">`
+                ).join('');
+            } else {
+                document.getElementById('imagePreview').innerHTML = '';
+            }
+            
+            document.getElementById('uploadStatus').textContent = '';
+        }
+
+        // 이미지 파일 선택 시 미리보기 및 업로드 (여러 장)
+        document.getElementById('imageFile').addEventListener('change', async function(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            document.getElementById('uploadStatus').textContent = `${files.length}개 이미지 업로드 중...`;
+            const previewDiv = document.getElementById('imagePreview');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                
+                // 미리보기
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; border-radius: 10px;';
+                    previewDiv.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+
+                // Google Drive에 업로드
+                const reader2 = new FileReader();
+                await new Promise((resolve, reject) => {
+                    reader2.onload = async function(event) {
+                        try {
+                            const base64Data = event.target.result;
+                            
+                            const response = await fetch(SCRIPT_URL, {
+                                method: 'POST',
+                                body: JSON.stringify({
+                                    action: 'upload',
+                                    imageData: base64Data,
+                                    fileName: file.name,
+                                    mimeType: file.type
+                                })
+                            });
+
+                            const result = await response.json();
+                            
+                            if (result.status === 'success') {
+                                uploadedImageUrls.push(result.imageUrl);
+                                document.getElementById('uploadStatus').textContent = `✅ ${i + 1}/${files.length} 업로드 완료!`;
+                                document.getElementById('uploadStatus').style.color = '#28a745';
+                            } else {
+                                throw new Error('업로드 실패');
+                            }
+                            resolve();
+
+                        } catch (error) {
+                            console.error('Upload error:', error);
+                            document.getElementById('uploadStatus').textContent = '❌ 업로드 실패. 다시 시도해주세요.';
+                            document.getElementById('uploadStatus').style.color = '#dc3545';
+                            reject(error);
+                        }
+                    };
+                    reader2.readAsDataURL(file);
+                });
+            }
+        });
+
+        // 매물 삭제
+        async function deleteProperty(index) {
+            if (!confirm('이 매물을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            const prop = allProperties[index];
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'delete',
+                        rowIndex: prop.rowIndex
+                    })
+                });
+
+                alert('매물이 삭제되었습니다.');
+                loadProperties();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('propertyModal').style.display = 'none';
+        }
+
+        // 폼 제출
+        document.getElementById('propertyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = {
+                action: editingRowIndex !== null ? 'update' : 'add',
+                매물종류: document.getElementById('propertyType').value,
+                거래유형: document.getElementById('dealType').value,
+                주소: document.getElementById('address').value,
+                가격: document.getElementById('price').value,
+                면적: document.getElementById('area').value,
+                방개수: document.getElementById('rooms').value,
+                욕실개수: document.getElementById('bathrooms').value,
+                설명: document.getElementById('description').value,
+                이미지URL: uploadedImageUrls.join(','), // 여러 URL을 쉼표로 연결
+                위도: '',
+                경도: ''
+            };
+
+            // 수정인 경우 rowIndex 추가
+            if (editingRowIndex !== null) {
+                formData.rowIndex = allProperties[editingRowIndex].rowIndex;
+            }
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                alert(editingRowIndex !== null ? '매물이 수정되었습니다.' : '매물이 추가되었습니다.');
+                closeModal();
+                
+                // 1초 후 새로고침
+                setTimeout(() => {
+                    loadProperties();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('저장 중 오류가 발생했습니다.');
+            }
+        });
+
+        // 모달 외부 클릭시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('propertyModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
